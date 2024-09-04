@@ -1,0 +1,31 @@
+.last-updated {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.suggestion-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.suggestion-text {
+    flex: 1;
+    font-size: 1rem;
+}
+
+.slds-button {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+}

@@ -1,0 +1,32 @@
+<template>
+    <lightning-card title="Sentiment Dashboard" icon-name="standard:case">
+        <template if:true={isLoading}>
+            <div class="slds-p-around_medium">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+        <template if:false={isLoading}>
+            <template if:true={error}>
+                <div class="slds-text-color_error">Error: {error.body.message}</div>
+            </template>
+            <template if:true={sentimentInfo}>
+                <div class="slds-p-around_medium">
+                    <p class="last-updated">{lastUpdatedDisplay}</p>
+                    <template if:true={formattedSuggestions.length}>
+                        <ul class="suggestion-list">
+                            <template for:each={formattedSuggestions} for:item="suggestion">
+                                <li key={suggestion.content} class="suggestion-item">
+                                    <span class="suggestion-text">{suggestion.content}</span>
+                                    <button class="slds-button slds-button_neutral slds-m-left_small" onclick={handleCopy}>Copy</button>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template if:false={formattedSuggestions.length}>
+                        <p>No suggestions available.</p>
+                    </template>
+                </div>
+            </template>
+        </template>
+    </lightning-card>
+</template>
