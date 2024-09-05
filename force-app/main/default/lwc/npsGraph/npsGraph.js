@@ -1,7 +1,7 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, api } from 'lwc';
 
 export default class NpsGraph extends LightningElement {
-    @track pointerValue = 50; // Configurable value to point at
+    @api pointerValue = 50; // Configurable value to point at
 
     get barStyle() {
         return 'background: linear-gradient(to right, green, yellow, orange, red); height: 20px; width: 100%;';

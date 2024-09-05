@@ -1,0 +1,31 @@
+.slds-text-color_error {
+    color: red;
+}
+
+.sentiment-grid {
+    margin-left: 16px;
+    margin-right: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three items per row */
+    gap: 16px; /* Space between the items */
+}
+
+.sentiment-item {
+    border-radius: 6px;
+    border: 3px solid transparent; /* Default border with dynamic color */
+    cursor: pointer;
+}
+
+.sentiment-item h2 {
+    margin: 0 0 0.5rem 0; /* Margin below the heading */
+    font-size: 1.25rem; /* Font size for the heading */
+}
+
+.sentiment-item p {
+    margin: 0.5rem 0; /* Margin around each paragraph */
+}
+
+.emoji {
+    font-size: 1.5rem;
+    margin-left: 8px;
+}

@@ -1,0 +1,20 @@
+<template>
+    <lightning-card title="Top Frustration Cases" icon-name="standard:case">
+        <template if:true={sentiments}>
+            <div class="sentiment-grid">
+                <template for:each={sentiments} for:item="sentiment">
+                    <div key={sentiment.Id} class="slds-box sentiment-item" onclick={handleItemClick} data-id={sentiment.connectedChatId__c} style={sentiment.borderStyle}>
+                        <lightning-card>
+                            <h2 class="slds-text-heading_small">{sentiment.emoji} {sentiment.summary__c}</h2>
+                            <p><strong>Opened </strong> {sentiment.duration__c} hours ago</p>
+                            <p><strong>Handling by</strong> {sentiment.agentName__c}</p>
+                        </lightning-card>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template if:true={error}>
+            <div class="slds-text-color_error">Error loading data</div>
+        </template>
+    </lightning-card>
+</template>
