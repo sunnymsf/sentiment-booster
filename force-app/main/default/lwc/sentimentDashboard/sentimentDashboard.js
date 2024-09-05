@@ -1,17 +1,22 @@
-import { LightningElement, api, wire, track } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import getSentimentInfo from '@salesforce/apex/SentimentController.getSentimentInfo';
+import escalateCase from '@salesforce/apex/CaseEscalationService.escalateCase';
 
 export default class SentimentDashboard extends LightningElement {
     @api recordId;
     @track sentimentInfo;
     @track error;
-    @track lastUpdated; // To store last updated time
-    @track isLoading = false; // To control the loading indicator
+    @track isLoading = false;
+    isFetching = false
+    @track editingIndex = null;
+    @track lastUpdatedDisplay = '';
+    @track showEscalateButton = true;
 
-    pollInterval = 5000; // Polling interval in milliseconds
-    pollingId; // To store the polling interval ID
+    pollingInterval = 300000; // Polling interval in milliseconds
 
     connectedCallback() {
+        this.isLoading = true;
+        this.fetchSentimentInfo();
         this.startPolling();
     }
 
@@ -22,63 +27,85 @@ export default class SentimentDashboard extends LightningElement {
     startPolling() {
         this.pollingId = setInterval(() => {
             this.fetchSentimentInfo();
-        }, this.pollInterval);
+        }, this.pollingInterval);
     }
 
     stopPolling() {
-        if (this.pollingId) {
-            clearInterval(this.pollingId);
-        }
+        clearInterval(this.pollingId);
     }
 
     fetchSentimentInfo() {
-        this.isLoading = true; // Show loading indicator
-        getSentimentInfo({ connectedChatId: this.recordId })
-            .then(data => {
-                this.sentimentInfo = JSON.parse(data);
-                this.lastUpdated = this.getCurrentDateTime(); // Update last updated time
-                this.error = undefined;
-                console.log("Fetched latest data",this.sentimentInfo)
-            })
-            .catch(error => {
-                this.error = error;
-                this.sentimentInfo = undefined;
-                this.lastUpdated = undefined;
-            })
-            .finally(() => {
-                this.isLoading = false; // Hide loading indicator
+        if (!this.isFetching) {
+            this.isFetching = true;
+            getSentimentInfo({ connectedChatId: this.recordId })
+                .then((data) => {
+                    this.sentimentInfo = JSON.parse(data);
+                    this.updateSuggestionsWithEditingState();
+                    this.lastUpdatedDisplay = this.getCurrentDateTime();
+                    //this.showEscalateButton = this.sentimentInfo.frustrationScore > 0.8;
+                    this.error = undefined;
+                    console.log('Data fetched:', data);
+                })
+                .catch((error) => {
+                    this.error = error;
+                    this.sentimentInfo = undefined;
+                    console.error('Error fetching data:', error);
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                    this.isFetching = false;
+                });
+        }
+    }
+
+    updateSuggestionsWithEditingState() {
+        if (this.sentimentInfo && this.sentimentInfo.suggestions) {
+            this.sentimentInfo.suggestions = this.sentimentInfo.suggestions.map((suggestion, index) => {
+                return { ...suggestion, isEditing: index === this.editingIndex };
             });
+        }
     }
 
     get formattedSuggestions() {
         return this.sentimentInfo?.suggestions || [];
     }
 
-    get lastUpdatedDisplay() {
-        return this.lastUpdated ? `Last Updated: ${this.lastUpdated}` : 'Last Updated: N/A';
+    get frustrationScore() {
+        return this.sentimentInfo?.frustrationScore * 10 || 50
+    }
+
+    handleEdit(event) {
+        this.editingIndex = parseInt(event.currentTarget.dataset.index, 10);
+        this.updateSuggestionsWithEditingState();
+    }
+
+    handleSave() {
+        this.editingIndex = null;
+        this.updateSuggestionsWithEditingState();
+    }
+
+    handleCopy(event) {
+        const content = event.currentTarget.dataset.content;
+        navigator.clipboard.writeText(content).then(() => {
+            console.log('Copied to clipboard:', content);
+        });
+    }
+
+    handleEscalate() {
+        escalateCase({ connectedChatId: this.recordId })
+            .then(() => {
+                console.log('Case escalated successfully.');
+            })
+            .catch(error => {
+                console.error('Error escalating case:', error);
+            });
     }
 
     getCurrentDateTime() {
         const now = new Date();
-        const options = {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            timeZone: 'Asia/Kolkata',
-            timeZoneName: 'short'
-        };
-        return new Intl.DateTimeFormat('en-IN', options).format(now);
-    }
-
-    handleCopy(event) {
-        const content = event.target.closest('li').querySelector('.suggestion-text').textContent.trim();
-        navigator.clipboard.writeText(content).then(() => {
-            console.log('Copied to clipboard:', content);
-        }).catch(err => {
-            console.error('Failed to copy:', err);
-        });
+        const options = { timeZone: 'Asia/Kolkata', hour12: true };
+        const date = now.toLocaleDateString('en-IN', options);
+        const time = now.toLocaleTimeString('en-IN', options);
+        return `*Last updated : ${date}, ${time}`;
     }
 }

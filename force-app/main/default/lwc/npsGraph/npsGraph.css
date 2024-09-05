@@ -1,7 +1,6 @@
 .chart-container {
     position: relative;
     width: 100%;
-    margin-top: 20px;
 }
 
 .bar {
@@ -23,4 +22,11 @@
     border-left: 10px solid transparent;
     border-right: 10px solid transparent;
     border-bottom: 15px solid black; /* Pointing downward */
+}
+
+.frustration-label{
+    font-style: italic;
+    color: lightcoral;
+    font-size: 11px;
+    font-weight: bold;
 }

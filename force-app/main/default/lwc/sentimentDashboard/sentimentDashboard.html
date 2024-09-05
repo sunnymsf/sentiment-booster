@@ -1,5 +1,5 @@
 <template>
-    <lightning-card title="Sentiment Dashboard" icon-name="standard:case">
+    <lightning-card title="Sentiment Recommendations" icon-name="standard:case">
         <template if:true={isLoading}>
             <div class="slds-p-around_medium">
                 <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
@@ -10,21 +10,41 @@
                 <div class="slds-text-color_error">Error: {error.body.message}</div>
             </template>
             <template if:true={sentimentInfo}>
-                <div class="slds-p-around_medium">
-                    <p class="last-updated">{lastUpdatedDisplay}</p>
+                <div class="sentiment-info">
                     <template if:true={formattedSuggestions.length}>
+                        <h2 class="suggestions-label">Reply Suggestions</h2>
                         <ul class="suggestion-list">
-                            <template for:each={formattedSuggestions} for:item="suggestion">
+                            <template for:each={formattedSuggestions} for:item="suggestion" for:index="index">
                                 <li key={suggestion.content} class="suggestion-item">
-                                    <span class="suggestion-text">{suggestion.content}</span>
-                                    <button class="slds-button slds-button_neutral slds-m-left_small" onclick={handleCopy}>Copy</button>
+                                    <template if:true={suggestion.isEditing}>
+                                        <div class="edit-input-container">
+                                            <lightning-input variant="label-hidden" class="edit-input" value={suggestion.content}></lightning-input>
+                                            <lightning-button-icon class="slds-button-icon" icon-name="utility:check" alternative-text="Save" data-index={index} onclick={handleSave}></lightning-button-icon>
+                                        </div>
+                                    </template>
+                                    <template if:false={suggestion.isEditing}>
+                                        <span class="suggestion-text">{suggestion.content}</span>
+                                        <lightning-button-icon class="slds-button-icon" icon-name="utility:copy" alternative-text="Copy" data-content={suggestion.content} onclick={handleCopy}></lightning-button-icon>
+                                        <lightning-button-icon class="slds-button-icon" icon-name="utility:edit" alternative-text="Edit" data-index={index} onclick={handleEdit}></lightning-button-icon>
+                                        <lightning-button-icon class="slds-button-icon" icon-name="utility:share_post" alternative-text="Post"></lightning-button-icon>
+                                    </template>
                                 </li>
                             </template>
                         </ul>
                     </template>
+                    
+                    <div class="nps-container">
+                        <c-nps-graph class="nps" pointer-value={frustrationScore}></c-nps-graph>
+                        <template if:true={showEscalateButton}>
+                            <lightning-button class="escalate-button slds-button slds-button_small slds-m-left_x-small" variant="destructive" label="Escalate" onclick={handleEscalate}></lightning-button>
+                        </template>
+                    </div>
+
                     <template if:false={formattedSuggestions.length}>
                         <p>No suggestions available.</p>
                     </template>
+
+                    <p class="last-updated">{lastUpdatedDisplay}</p>
                 </div>
             </template>
         </template>
