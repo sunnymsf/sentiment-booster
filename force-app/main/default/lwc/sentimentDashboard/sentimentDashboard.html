@@ -1,5 +1,5 @@
 <template>
-    <lightning-card title="Sentiment Recommendations" icon-name="standard:case">
+    <lightning-card title="Sentiment Booster" icon-name="standard:case">
         <template if:true={isLoading}>
             <div class="slds-p-around_medium">
                 <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
@@ -12,7 +12,7 @@
             <template if:true={sentimentInfo}>
                 <div class="sentiment-info">
                     <template if:true={formattedSuggestions.length}>
-                        <h2 class="suggestions-label">Reply Suggestions</h2>
+                        <h2 class="suggestions-label" onclick={fetchSentimentInfo}>Reply Suggestions</h2>
                         <ul class="suggestion-list">
                             <template for:each={formattedSuggestions} for:item="suggestion" for:index="index">
                                 <li key={suggestion.content} class="suggestion-item">

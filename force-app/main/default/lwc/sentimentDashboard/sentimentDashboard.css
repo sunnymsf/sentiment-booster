@@ -8,6 +8,7 @@
 .suggestions-label{
     font-weight: bold;
     margin-bottom: 10px;
+    cursor: pointer;
 }
 
 .suggestion-list {
